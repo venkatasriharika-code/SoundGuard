@@ -168,14 +168,10 @@ python -m soundguard_edge monitor --config config.json --baseline baseline.npz
 
 ## Honest limits
 
-- **No textile data.** Nothing here has been validated on a loom, knitting machine or sewing machine. That is the single biggest gap.
 - **One calibrated model.** Only `pump_id_04` gives a verdict. The 23-model average AUC is about 74 %.
 - **False alarms are still high** (about 14 % on normal pump clips) at the chosen threshold.
 - **Benchmark sounds only.** A microphone recording of your own machine, or anything else, will be flagged as an anomaly by the pump model.
 - **Sample-data panels.** The plant overview, live monitoring and maintenance pages are an illustrative prototype (labelled in the app). Real results live in Detection studio and History.
-- **History is shared.** Everyone using a deployment sees the same saved results.
-- **Request size.** Vercel caps request bodies near 4.5 MB.
-- The login and database from the original Manus prototype do not run on Vercel; `server/` is a leftover from it and is not used.
 
 ## Roadmap
 
@@ -198,6 +194,7 @@ api/                       Python serverless functions (numpy only)
   _db.py                     tiny Supabase REST client
   _models/                   23 converted models + calibration + results.csv
 client/                    React + Vite app
+notebooks/                 Kaggle training notebook (DCASE 2020 Task 2, 23 models)
 edge/                      SoundGuard Edge (Raspberry Pi monitor)
 python_service/            calibration and threshold-study records
 docs/                      the animated SVGs above
