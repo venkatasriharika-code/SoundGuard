@@ -38,6 +38,21 @@ def read_wav(data: bytes):
     return x, sr
 
 
+TARGET_SR = 16000
+
+
+def resample_to_16k(y: np.ndarray, sr: int) -> np.ndarray:
+    """FFT resampling (ideal low-pass, numpy only). 16 kHz input is returned untouched, so DCASE files score exactly as before."""
+    if sr == TARGET_SR or len(y) == 0:
+        return y
+    n_out = max(1, int(round(len(y) * TARGET_SR / sr)))
+    X = np.fft.rfft(y.astype(np.float64))
+    Y = np.zeros(n_out // 2 + 1, dtype=np.complex128)
+    k = min(len(Y), len(X))
+    Y[:k] = X[:k]
+    return (np.fft.irfft(Y, n=n_out) * (n_out / len(y))).astype(np.float32)
+
+
 def _hz_to_mel(f):
     f = np.asarray(f, dtype=np.float64)
     f_sp, min_log_hz = 200.0 / 3, 1000.0
@@ -122,9 +137,11 @@ def analyze(data: bytes, machine: str, machine_id: str, filename: str) -> dict:
         model = load_model(key)
     except FileNotFoundError:
         raise KeyError(f"Unknown machine model '{key}'.")
-    y, sr = read_wav(data)
-    if len(y) / sr > MAX_SECONDS:
+    y, orig_sr = read_wav(data)
+    if len(y) / orig_sr > MAX_SECONDS:
         raise ValueError(f"Audio is longer than {MAX_SECONDS} seconds.")
+    y = resample_to_16k(y, orig_sr)
+    sr = TARGET_SR
     v = stack_frames(log_mel(y, sr))
     if len(v) == 0:
         raise ValueError("Audio is too short to analyse (need at least ~0.2 s).")
@@ -132,7 +149,7 @@ def analyze(data: bytes, machine: str, machine_id: str, filename: str) -> dict:
     score = float(fs.mean())
     cal = CAL.get(key)
     auc, pauc = RESULTS.get(key, (None, None))
-    out = {"filename": filename, "machine": machine, "machineId": machine_id.zfill(2), "sampleRate": int(sr), "channels": 1,
+    out = {"filename": filename, "machine": machine, "machineId": machine_id.zfill(2), "sampleRate": int(orig_sr), "analysedAtSampleRate": TARGET_SR, "channels": 1,
            "durationSeconds": round(len(y) / sr, 3),
            "featureConfig": {"n_fft": N_FFT, "hop_length": HOP, "n_mels": N_MELS, "power": POWER,
                              "log_scaling": "20/power*log10(mel+eps)", "stacked_frames": FRAMES},
