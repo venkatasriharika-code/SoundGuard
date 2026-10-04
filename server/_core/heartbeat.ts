@@ -4,106 +4,79 @@ import { ENV } from "./env";
 export type HeartbeatJob = {
   name: string;
   /**
-   * 6-field cron with seconds (`sec min hour dom mon dow`), UTC, min interval 60s.
-   * Use `0` for the seconds field — e.g. `"0 0 9 * * *"` is daily 09:00 UTC.
-   * See /home/ubuntu/skills/webdev-periodic-updates/SKILL.md.
+   * 6-field cron with seconds is NOT supported here — cron-job.org uses
+   * standard 5-field cron (`min hour dom mon dow`), UTC, min interval 60s
+   * (actually 1 minute granularity on the free tier).
+   * e.g. `"0 9 * * *"` is daily 09:00 UTC.
    */
   cron: string;
-  /** Callback path. MUST start with `/api/scheduled/`. */
-  path: string;
+  /** Full callback URL. MUST start with your deployed origin + /api/scheduled/. */
+  url: string;
   method?: "POST" | "PUT";
   payload?: unknown;
   description?: string;
 };
 
-/**
- * Update patch. All fields optional; unset = leave unchanged.
- * `enable`: true = resume, false = pause; omit = unchanged.
- * `name` is the (project, owner)-scope key and cannot be changed.
- */
 export type HeartbeatJobUpdate = Partial<Omit<HeartbeatJob, "name">> & {
   enable?: boolean;
 };
 
 export type HeartbeatJobInfo = {
-  taskUid: string;
-  name: string;
-  userId: string;
-  description: string;
-  cronExpression: string;
-  callbackPath: string;
-  callbackMethod: string;
-  callbackPayload: string;
-  isEnable: boolean;
-  createdAt?: string | null;
-  lastExecutedAt?: string | null;
-  nextExecutionAt?: string | null;
+  jobId: number;
+  title: string;
+  url: string;
+  schedule: Record<string, unknown>;
+  enabled: boolean;
+  lastExecution?: number | null;
+  nextExecution?: number | null;
 };
 
-const SERVICE = "webdevtoken.v1.WebDevService";
+const API_BASE = "https://api.cron-job.org";
 
-const buildEndpoint = (rpc: string): string => {
-  if (!ENV.forgeApiUrl) {
+function getApiKey(): string {
+  if (!ENV.cronJobApiKey) {
     throw new TRPCError({
       code: "INTERNAL_SERVER_ERROR",
-      message: "Heartbeat service URL is not configured (BUILT_IN_FORGE_API_URL).",
+      message: "Heartbeat service API key is not configured (CRON_JOB_API_KEY).",
     });
   }
-  if (!ENV.forgeApiKey) {
-    throw new TRPCError({
-      code: "INTERNAL_SERVER_ERROR",
-      message: "Heartbeat service API key is not configured (BUILT_IN_FORGE_API_KEY).",
-    });
-  }
-  const baseUrl = ENV.forgeApiUrl;
-  const normalizedBase = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
-  return new URL(`${SERVICE}/${rpc}`, normalizedBase).toString();
-};
+  return ENV.cronJobApiKey;
+}
 
-const callForge = async <T>(
-  rpc: string,
-  body: Record<string, unknown>,
-  userSession: string
-): Promise<T> => {
-  const endpoint = buildEndpoint(rpc);
-  const headers: Record<string, string> = {
-    accept: "application/json",
-    authorization: `Bearer ${ENV.forgeApiKey}`,
-    "content-type": "application/json",
-    "connect-protocol-version": "1",
-  };
-  // userSession is the decoded `app_session_id` cookie value (NOT the raw
-  // Cookie header). Empty string falls back to the project owner identity.
-  if (userSession) {
-    headers["x-manus-user-session"] = userSession;
-  }
+async function callCronJobApi<T>(
+  method: "GET" | "PUT" | "PATCH" | "DELETE",
+  path: string,
+  body?: Record<string, unknown>,
+): Promise<T> {
+  const apiKey = getApiKey();
 
   let response: Response;
   try {
-    response = await fetch(endpoint, {
-      method: "POST",
-      headers,
-      body: JSON.stringify(body),
+    response = await fetch(`${API_BASE}${path}`, {
+      method,
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: body ? JSON.stringify(body) : undefined,
     });
   } catch (error) {
     throw new TRPCError({
       code: "INTERNAL_SERVER_ERROR",
-      message: `Heartbeat ${rpc} network error: ${String(error)}`,
+      message: `Heartbeat ${method} ${path} network error: ${String(error)}`,
     });
   }
 
   if (!response.ok) {
     const detail = await response.text().catch(() => "");
-    throw mapForgeError(response, detail, rpc);
+    throw mapApiError(response, detail, path);
   }
-  return (await response.json()) as T;
-};
 
-const mapForgeError = (
-  response: Response,
-  detail: string,
-  rpc: string
-): TRPCError => {
+  if (response.status === 204) return {} as T;
+  return (await response.json()) as T;
+}
+
+function mapApiError(response: Response, detail: string, path: string): TRPCError {
   const status = response.status;
   let code: TRPCError["code"] = "INTERNAL_SERVER_ERROR";
   if (status === 401) code = "UNAUTHORIZED";
@@ -114,100 +87,100 @@ const mapForgeError = (
   else if (status === 429) code = "TOO_MANY_REQUESTS";
   return new TRPCError({
     code,
-    message: `Heartbeat ${rpc} failed (${status})${detail ? `: ${detail}` : ""}`,
+    message: `Heartbeat ${path} failed (${status})${detail ? `: ${detail}` : ""}`,
   });
-};
+}
 
-const stringifyPayload = (payload: unknown): string => {
-  if (payload === undefined || payload === null) return "{}";
-  if (typeof payload === "string") return payload;
-  return JSON.stringify(payload);
-};
-
-const validateCallbackPath = (path: string): void => {
-  if (!path || !path.startsWith("/api/scheduled/")) {
+/** Parses a 5-field cron string into cron-job.org's schedule object (UTC). */
+function parseCron(cron: string) {
+  const parts = cron.trim().split(/\s+/);
+  if (parts.length !== 5) {
     throw new TRPCError({
       code: "BAD_REQUEST",
-      message: "callback path must start with /api/scheduled/",
+      message: `Expected 5-field cron (min hour dom mon dow), got: "${cron}"`,
     });
   }
-};
+  const [minutes, hours, mdays, months, wdays] = parts;
+  const expand = (field: string, max: number): number[] =>
+    field === "*" ? Array.from({ length: max }, (_, i) => i) : field.split(",").map(Number);
+  return {
+    timezone: "UTC",
+    minutes: expand(minutes, 60),
+    hours: expand(hours, 24),
+    mdays: expand(mdays, 31),
+    months: expand(months, 12),
+    wdays: expand(wdays, 7),
+  };
+}
 
-/**
- * Create a new HTTP cron job. Returns the assigned `taskUid` to persist on
- * your business row so callbacks can dereference it.
- */
+function validateCallbackUrl(url: string): void {
+  if (!url || !/\/api\/scheduled\//.test(url)) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "callback url must contain /api/scheduled/",
+    });
+  }
+}
+
+/** Create a new HTTP cron job. Returns the assigned jobId to persist. */
 export async function createHeartbeatJob(
   job: HeartbeatJob,
-  userSession: string
-): Promise<{ taskUid: string; nextExecutionAt?: string | null }> {
-  validateCallbackPath(job.path);
-  return callForge<{ taskUid: string; nextExecutionAt?: string | null }>(
-    "CreateHeartbeatJob",
-    {
-      name: job.name,
-      cronExpression: job.cron,
-      callbackPath: job.path,
-      callbackMethod: job.method ?? "POST",
-      callbackPayload: stringifyPayload(job.payload),
-      description: job.description ?? "",
+): Promise<{ jobId: number }> {
+  validateCallbackUrl(job.url);
+  const res = await callCronJobApi<{ jobId: number }>("PUT", "/jobs", {
+    job: {
+      title: job.name,
+      url: job.url,
+      enabled: true,
+      saveResponses: false,
+      requestMethod: job.method === "PUT" ? 2 : 1, // 1=POST, 2=PUT per their API
+      schedule: parseCron(job.cron),
+      extendedData: job.payload
+        ? { body: JSON.stringify(job.payload), headers: ["Content-Type: application/json"] }
+        : undefined,
     },
-    userSession
-  );
+  });
+  return res;
 }
 
-/**
- * Update an existing cron located by `taskUid`. Only fields you pass in
- * `patch` are mutated. `enable` flips resume/pause; omit to leave alone.
- */
+/** Update an existing job located by jobId. Only passed fields are changed. */
 export async function updateHeartbeatJob(
-  taskUid: string,
+  jobId: number,
   patch: HeartbeatJobUpdate,
-  userSession: string
-): Promise<{ nextExecutionAt?: string | null }> {
-  if (patch.path !== undefined) validateCallbackPath(patch.path);
-  const body: Record<string, unknown> = { taskUid };
-  if (patch.cron !== undefined) body.cronExpression = patch.cron;
-  if (patch.path !== undefined) body.callbackPath = patch.path;
-  if (patch.method !== undefined) body.callbackMethod = patch.method;
-  if (patch.payload !== undefined) {
-    body.callbackPayload = stringifyPayload(patch.payload);
-  }
-  if (patch.description !== undefined) body.description = patch.description;
-  if (patch.enable !== undefined) body.enable = patch.enable;
-  return callForge<{ nextExecutionAt?: string | null }>(
-    "UpdateHeartbeatJob",
-    body,
-    userSession
-  );
-}
-
-/** Delete a cron located by `taskUid`. Idempotent on caller side. */
-export async function deleteHeartbeatJob(
-  taskUid: string,
-  userSession: string
 ): Promise<void> {
-  await callForge("DeleteHeartbeatJob", { taskUid }, userSession);
+  if (patch.url !== undefined) validateCallbackUrl(patch.url);
+  const job: Record<string, unknown> = {};
+  if (patch.name !== undefined) job.title = patch.name;
+  if (patch.url !== undefined) job.url = patch.url;
+  if (patch.cron !== undefined) job.schedule = parseCron(patch.cron);
+  if (patch.method !== undefined) job.requestMethod = patch.method === "PUT" ? 2 : 1;
+  if (patch.enable !== undefined) job.enabled = patch.enable;
+  if (patch.payload !== undefined) {
+    job.extendedData = {
+      body: JSON.stringify(patch.payload),
+      headers: ["Content-Type: application/json"],
+    };
+  }
+  await callCronJobApi("PATCH", `/jobs/${jobId}`, { job });
 }
 
-/**
- * List cron jobs owned by the resolved actor (end-user when `userSession`
- * is set, project owner otherwise) within the current project.
- *
- * `actorUserId` in the response echoes whose cron list you got back. End-users
- * cannot list other users' crons via this SDK; cross-user inspection is
- * owner-only via the sandbox CLI (`manus-heartbeat list --user-id <uid>`).
- */
-export async function listHeartbeatJobs(
-  userSession: string,
-  pagination?: { page?: number; pageSize?: number }
-): Promise<{ total: number; actorUserId: string; jobs: HeartbeatJobInfo[] }> {
-  const body: Record<string, unknown> = {};
-  if (pagination?.page !== undefined) body.page = pagination.page;
-  if (pagination?.pageSize !== undefined) body.pageSize = pagination.pageSize;
-  return callForge<{
-    total: number;
-    actorUserId: string;
-    jobs: HeartbeatJobInfo[];
-  }>("ListHeartbeatJobs", body, userSession);
+/** Delete a job by jobId. */
+export async function deleteHeartbeatJob(jobId: number): Promise<void> {
+  await callCronJobApi("DELETE", `/jobs/${jobId}`);
+}
+
+/** List all jobs under this account's API key. */
+export async function listHeartbeatJobs(): Promise<{ jobs: HeartbeatJobInfo[] }> {
+  const res = await callCronJobApi<{ jobs: any[] }>("GET", "/jobs");
+  return {
+    jobs: res.jobs.map((j) => ({
+      jobId: j.jobId,
+      title: j.title,
+      url: j.url,
+      schedule: j.schedule,
+      enabled: j.enabled,
+      lastExecution: j.lastExecution ?? null,
+      nextExecution: j.nextExecution ?? null,
+    })),
+  };
 }
