@@ -78,7 +78,7 @@ Read these honestly:
 </p>
 
 1. **Features.** Audio is resampled to 16 kHz and turned into a log-mel spectrogram (1024-point FFT, hop 512, 64 mel bands). Five consecutive frames are stacked into one 320-value vector.
-2. **Model.** A fully connected autoencoder: `320 → 128 ×4 → 8 → 128 ×4 → 320`, with batch norm and ReLU. Trained to rebuild **normal** sound.
+2. **Model.** A fully connected autoencoder: `320 → 128 ×4 → 8 → 128 ×4 → 320`, with batch norm and ReLU. Trained to rebuild **normal** sound.The training code is in [`notebooks/soundguard.ipynb`](notebooks/soundguard.ipynb).
 3. **Score.** The mean squared reconstruction error across the clip. Normal sound is rebuilt well (low error); anything the model has never seen is rebuilt badly (high error).
 4. **Verdict.** The score is compared with a threshold set from normal files. `ratio = score / threshold`; above 1.0 is flagged.
 
