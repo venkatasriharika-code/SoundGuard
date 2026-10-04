@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 612" width="1200" height="612" role="img" aria-labelledby="t d">
+<title id="t">SoundGuard architecture</title>
+<desc id="d">A browser sends a WAV file to a Python function on Vercel, which returns a score and verdict and saves the reading to Supabase. A separate edge monitor runs on a Raspberry Pi.</desc>
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0c1410"/><stop offset="1" stop-color="#101c15"/></linearGradient>
+  <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse"><path d="M30 0H0V30" fill="none" stroke="#ffffff" stroke-opacity=".035"/></pattern>
+  <marker id="ah-7fe3ff" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#7fe3ff"/></marker>
+  <marker id="ah-c8ff47" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#c8ff47"/></marker>
+  <marker id="ah-f0a43a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#f0a43a"/></marker>
+  <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+<style>
+  .sans{font-family:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif}
+  .mono{font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace}
+  .flow{stroke-dasharray:7 7;animation:flow 1.1s linear infinite}
+  @keyframes flow{to{stroke-dashoffset:-14}}
+  .pulse{animation:pulse 2.4s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:.55}50%{opacity:1}}
+  @media (prefers-reduced-motion:reduce){.flow,.pulse{animation:none!important}}
+</style>
+<rect width="1200" height="612" rx="26" fill="url(#bg)"/><rect width="1200" height="612" rx="26" fill="url(#grid)"/>
+<rect x="1.5" y="1.5" width="1197" height="609" rx="25" fill="none" stroke="#c8ff47" stroke-opacity=".18"/>
+<text x="40" y="44" class="mono" font-size="13" letter-spacing="3" fill="#8bd450">HOW THE WEBSITE WORKS</text>
+
+<rect x="40" y="70" width="290" height="270" rx="16" fill="#ffffff" fill-opacity=".04" stroke="#7fe3ff" stroke-opacity=".45"/><text x="58" y="98" class="sans" font-size="16" font-weight="700" fill="#f4f1e6">Browser</text><text x="58" y="118" class="mono" font-size="12" fill="#98a495">React + Vite</text>
+<text x="60" y="150" class="sans" font-size="14" fill="#e9efe2" text-anchor="start" font-weight="400">Record from the mic or upload a clip</text>
+<text x="60" y="180" class="sans" font-size="13" fill="#b9c3b2" text-anchor="start" font-weight="400">Detection studio: score, verdict,</text>
+<text x="60" y="198" class="sans" font-size="13" fill="#b9c3b2" text-anchor="start" font-weight="400">frame-by-frame error chart</text>
+<text x="60" y="232" class="sans" font-size="13" fill="#b9c3b2" text-anchor="start" font-weight="400">History: saved results + trend</text>
+<text x="60" y="250" class="sans" font-size="13" fill="#b9c3b2" text-anchor="start" font-weight="400">Non-WAV audio converted to</text>
+<text x="60" y="268" class="sans" font-size="13" fill="#b9c3b2" text-anchor="start" font-weight="400">16 kHz mono WAV in the browser</text>
+<text x="60" y="314" class="sans" font-size="12" fill="#f0a43a" text-anchor="start" font-weight="400">Sample-data panels are labelled</text>
+
+<rect x="410" y="70" width="410" height="270" rx="16" fill="#ffffff" fill-opacity=".04" stroke="#ffffff" stroke-opacity=".35"/><text x="428" y="98" class="sans" font-size="16" font-weight="700" fill="#f4f1e6">Vercel</text><text x="428" y="118" class="mono" font-size="12" fill="#98a495">static site + Python functions</text>
+<rect x="432" y="126" width="366" height="134" rx="12" fill="#c8ff47" fill-opacity=".07" stroke="#c8ff47" stroke-opacity=".5"/>
+<text x="448" y="152" class="mono" font-size="14" font-weight="700" fill="#dff7a8">POST /api/analyze-audio</text>
+<text x="448" y="176" class="sans" font-size="12.5" fill="#98a495" text-anchor="start" font-weight="400">numpy only: no PyTorch, no librosa</text>
+<text x="448" y="200" class="sans" font-size="13.5" fill="#e9efe2">WAV → 16 kHz → log-mel (5 frames)</text>
+<text x="448" y="222" class="sans" font-size="13.5" fill="#e9efe2">→ autoencoder → error vs threshold</text>
+<text x="448" y="244" class="sans" font-size="13.5" fill="#e9efe2" font-weight="700">→ Normal / Anomaly + frame scores</text>
+<rect x="432" y="274" width="366" height="52" rx="12" fill="#ffffff" fill-opacity=".05" stroke="#ffffff" stroke-opacity=".25"/>
+<text x="448" y="298" class="mono" font-size="14" font-weight="700" fill="#e9efe2">GET /api/history</text>
+<text x="448" y="316" class="sans" font-size="12.5" fill="#98a495" text-anchor="start" font-weight="400">recent saved results + totals</text>
+
+<rect x="910" y="70" width="250" height="270" rx="16" fill="#ffffff" fill-opacity=".04" stroke="#3ecf8e" stroke-opacity=".55"/><text x="928" y="98" class="sans" font-size="16" font-weight="700" fill="#f4f1e6">Supabase</text><text x="928" y="118" class="mono" font-size="12" fill="#98a495">Postgres, private</text>
+<g class="mono" font-size="12.5" fill="#cfe9dc"><text x="930" y="150">table readings</text></g>
+<g class="mono" font-size="12" fill="#98a495"><text x="930" y="178">created_at</text><text x="930" y="198">filename</text><text x="930" y="218">machine, machine_id</text><text x="930" y="238">score, threshold, ratio</text><text x="930" y="258">decision</text><text x="930" y="278">frame_scores</text></g>
+<text x="930" y="318" class="sans" font-size="12" fill="#3ecf8e" text-anchor="start" font-weight="700">scores only, never audio</text>
+
+<path class="flow" d="M334 178H406" fill="none" stroke="#7fe3ff" stroke-width="2.2" stroke-linecap="round" marker-end="url(#ah-7fe3ff)"/><text x="370" y="168" class="sans" font-size="12" fill="#7fe3ff" text-anchor="middle" font-weight="400">WAV</text>
+<path class="flow" d="M406 240H334" fill="none" stroke="#c8ff47" stroke-width="2.2" stroke-linecap="round" marker-end="url(#ah-c8ff47)"/><text x="370" y="258" class="sans" font-size="12" fill="#c8ff47" text-anchor="middle" font-weight="400">JSON</text>
+<path class="flow" d="M334 304H406" fill="none" stroke="#7fe3ff" stroke-width="2.2" stroke-linecap="round" marker-end="url(#ah-7fe3ff)"/><text x="370" y="294" class="sans" font-size="12" fill="#7fe3ff" text-anchor="middle" font-weight="400">GET</text>
+<path class="flow" d="M824 190H906" fill="none" stroke="#f0a43a" stroke-width="2.2" stroke-linecap="round" marker-end="url(#ah-f0a43a)"/><text x="865" y="180" class="sans" font-size="12" fill="#f0a43a" text-anchor="middle" font-weight="400">INSERT</text>
+<path class="flow" d="M906 300H824" fill="none" stroke="#f0a43a" stroke-width="2.2" stroke-linecap="round" marker-end="url(#ah-f0a43a)"/><text x="865" y="290" class="sans" font-size="12" fill="#f0a43a" text-anchor="middle" font-weight="400">SELECT</text>
+
+<g transform="translate(0,24)"><rect x="40" y="372" width="1120" height="178" rx="16" fill="#ffffff" fill-opacity=".04" stroke="#f0a43a" stroke-opacity=".55" stroke-dasharray="7 6"/><text x="58" y="400" class="sans" font-size="16" font-weight="700" fill="#f4f1e6">SoundGuard Edge</text><text x="58" y="420" class="mono" font-size="12" fill="#98a495">separate Python package for a Raspberry Pi · not yet wired to the website</text>
+<g class="sans" font-size="14" font-weight="600">
+  <rect x="64" y="438" width="200" height="56" rx="10" fill="#ffffff" fill-opacity=".05" stroke="#ffffff" stroke-opacity=".2"/><text x="164" y="462" text-anchor="middle" fill="#e9efe2">Microphone</text><text x="164" y="481" text-anchor="middle" class="mono" font-size="11" font-weight="400" fill="#98a495">fixed on the machine</text>
+  <rect x="326" y="438" width="230" height="56" rx="10" fill="#c8ff47" fill-opacity=".08" stroke="#c8ff47" stroke-opacity=".5"/><text x="441" y="462" text-anchor="middle" fill="#dff7a8">Learn this machine</text><text x="441" y="481" text-anchor="middle" class="mono" font-size="11" font-weight="400" fill="#98a495">hours of normal sound</text>
+  <rect x="618" y="438" width="250" height="56" rx="10" fill="#c8ff47" fill-opacity=".08" stroke="#c8ff47" stroke-opacity=".5"/><text x="743" y="462" text-anchor="middle" fill="#dff7a8">Monitor 24/7</text><text x="743" y="481" text-anchor="middle" class="mono" font-size="11" font-weight="400" fill="#98a495">alert only if 4 of 6 windows are off</text>
+  <rect x="930" y="438" width="206" height="56" rx="10" fill="#d1352b" fill-opacity=".16" stroke="#ff5a4d" stroke-opacity=".6"/><text x="1033" y="462" text-anchor="middle" fill="#ffb0a3">Telegram / webhook</text><text x="1033" y="481" text-anchor="middle" class="mono" font-size="11" font-weight="400" fill="#98a495">+ saves flagged clips</text>
+</g>
+<path class="flow" d="M268 466H322" fill="none" stroke="#c8ff47" stroke-width="2.2" stroke-linecap="round" marker-end="url(#ah-c8ff47)"/><path class="flow" d="M560 466H614" fill="none" stroke="#c8ff47" stroke-width="2.2" stroke-linecap="round" marker-end="url(#ah-c8ff47)"/><path class="flow" d="M872 466H926" fill="none" stroke="#c8ff47" stroke-width="2.2" stroke-linecap="round" marker-end="url(#ah-c8ff47)"/>
+<text x="64" y="530" class="mono pulse" font-size="12" fill="#f0a43a">tested on synthetic audio only · needs a real machine recording to validate</text>
+</g>
+</svg>
