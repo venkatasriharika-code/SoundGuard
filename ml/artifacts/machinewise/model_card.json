@@ -1,0 +1,54 @@
+{
+  "experiment": "soundguard_machinewise_embedding_distance_baseline",
+  "task": "unsupervised anomalous sound detection",
+  "method": "one normal standardized embedding envelope and 99th-percentile threshold per machine type",
+  "training_rows": 7000,
+  "evaluation_rows": 1400,
+  "machine_models": {
+    "ToyCar": {
+      "threshold": 1.89394523,
+      "normal_rows": 1000
+    },
+    "ToyTrain": {
+      "threshold": 1.48171822,
+      "normal_rows": 1000
+    },
+    "bearing": {
+      "threshold": 1.84602926,
+      "normal_rows": 1000
+    },
+    "fan": {
+      "threshold": 1.31648143,
+      "normal_rows": 1000
+    },
+    "gearbox": {
+      "threshold": 1.56756431,
+      "normal_rows": 1000
+    },
+    "slider": {
+      "threshold": 1.69370362,
+      "normal_rows": 1000
+    },
+    "valve": {
+      "threshold": 1.50338986,
+      "normal_rows": 1000
+    }
+  },
+  "metrics": {
+    "samples": 1400,
+    "normal_samples": 700,
+    "anomalous_samples": 700,
+    "true_positive": 16,
+    "true_negative": 643,
+    "false_positive": 57,
+    "false_negative": 684,
+    "precision": 0.219178,
+    "recall": 0.022857,
+    "f1": 0.041397,
+    "accuracy": 0.470714
+  },
+  "limitations": [
+    "This remains a transparent benchmark baseline, not a production deployment model.",
+    "Machine-type groupings and public benchmark domains do not replace factory calibration."
+  ]
+}

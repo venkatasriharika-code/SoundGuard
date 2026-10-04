@@ -1,0 +1,31 @@
+{
+  "experiment": "soundguard_embedding_distance_baseline",
+  "task": "unsupervised anomalous sound detection",
+  "training_source": "ml/data/dev_train_embeddings.npz",
+  "evaluation_source": "ml/data/dev_test_embeddings.npz",
+  "feature_key": "arr_0",
+  "feature_dimension": 2976,
+  "training_rows": 7000,
+  "normal_training_rows": 7000,
+  "method": "standardized root-mean-square embedding deviation from the normal training centroid",
+  "threshold_rule": "99th percentile of normal training scores",
+  "threshold": 2.00589045,
+  "metrics": {
+    "samples": 1400,
+    "normal_samples": 700,
+    "anomalous_samples": 700,
+    "true_positive": 8,
+    "true_negative": 687,
+    "false_positive": 13,
+    "false_negative": 692,
+    "precision": 0.380952,
+    "recall": 0.011429,
+    "f1": 0.022191,
+    "accuracy": 0.496429
+  },
+  "limitations": [
+    "This is a transparent benchmark baseline, not a production deployment model.",
+    "The public benchmark does not represent SoundGuard factory-pilot recordings.",
+    "A real deployment needs machine-wise splits, sensor-placement controls, calibration monitoring, and human review."
+  ]
+}

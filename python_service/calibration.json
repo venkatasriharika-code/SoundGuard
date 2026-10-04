@@ -1,0 +1,21 @@
+{
+  "pump_id_04": {
+    "key": "pump_id_04",
+    "machine": "pump",
+    "id": "04",
+    "threshold95": 0.4133783936500548,
+    "normal_training_files": 602,
+    "validation_normal_files": 20,
+    "validation_anomaly_files": 20,
+    "auc": 0.97,
+    "recall": 1.0,
+    "false_alarm_rate": 0.5,
+    "confusion": {
+      "tp": 20,
+      "tn": 10,
+      "fp": 10,
+      "fn": 0
+    },
+    "reliability": "strongest live-demo ID"
+  }
+}

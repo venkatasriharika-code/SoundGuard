@@ -1,0 +1,12 @@
+{
+  "buildCommand": "npx vite build",
+  "outputDirectory": "dist/public",
+  "installCommand": "npm install -g pnpm && pnpm install --no-frozen-lockfile",
+  "functions": {
+    "api/analyze-audio.py": { "includeFiles": "api/_models/**", "maxDuration": 30, "memory": 1024 }
+  },
+  "rewrites": [
+    { "source": "/manus-storage/:path*", "destination": "https://soundguard-auwq4wca.manus.space/manus-storage/:path*" },
+    { "source": "/((?!api/|manus-storage/).*)", "destination": "/index.html" }
+  ]
+}

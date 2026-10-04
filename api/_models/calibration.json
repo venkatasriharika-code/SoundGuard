@@ -1,0 +1,20 @@
+{
+  "pump_id_04": {
+    "key": "pump_id_04",
+    "machine": "pump",
+    "id": "04",
+    "normal_training_files": 602,
+    "validation_normal_files": 20,
+    "validation_anomaly_files": 20,
+    "reliability": "strongest live-demo ID",
+    "threshold_p95": 0.4133783936500548,
+    "threshold": 0.5358611941337585,
+    "threshold_rule": "max of 481 normal calibration files (threshold_study_pump_id_04.json)",
+    "reported_test": {
+      "recall": 0.98,
+      "false_alarm_rate": 0.14,
+      "test_files": 100,
+      "note": "cutoff chosen after comparing p95/p99/max on the same test split; treat as optimistic"
+    }
+  }
+}

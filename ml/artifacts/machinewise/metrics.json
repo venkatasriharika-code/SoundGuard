@@ -1,0 +1,13 @@
+{
+  "samples": 1400,
+  "normal_samples": 700,
+  "anomalous_samples": 700,
+  "true_positive": 16,
+  "true_negative": 643,
+  "false_positive": 57,
+  "false_negative": 684,
+  "precision": 0.219178,
+  "recall": 0.022857,
+  "f1": 0.041397,
+  "accuracy": 0.470714
+}

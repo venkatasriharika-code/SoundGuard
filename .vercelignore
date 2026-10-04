@@ -1,0 +1,7 @@
+node_modules
+python_service/models
+ml
+dist/index.js
+scripts
+*.md
+!README.md

@@ -1,0 +1,56 @@
+{
+  "key": "pump_id_04",
+  "split_rule": "first 80% sorted normal training files for calibration; final 20% normal training files are holdout; last 50 normal and last 50 anomaly test files are the separate reported test split; no test labels used for threshold choice",
+  "cutoffs": {
+    "p95": {
+      "threshold": 0.4168287217617035,
+      "calibration_normal_files": 481,
+      "calibration_normal_false_alarm_rate": 0.0498960498960499,
+      "holdout_normal_files": 121,
+      "holdout_normal_false_alarm_rate": 0.03305785123966942,
+      "test_files": 100,
+      "test": {
+        "recall": 1.0,
+        "false_alarm_rate": 0.46,
+        "tp": 50,
+        "fn": 0,
+        "fp": 23,
+        "tn": 27
+      }
+    },
+    "p99": {
+      "threshold": 0.4670179724693298,
+      "calibration_normal_files": 481,
+      "calibration_normal_false_alarm_rate": 0.010395010395010396,
+      "holdout_normal_files": 121,
+      "holdout_normal_false_alarm_rate": 0.008264462809917356,
+      "test_files": 100,
+      "test": {
+        "recall": 1.0,
+        "false_alarm_rate": 0.28,
+        "tp": 50,
+        "fn": 0,
+        "fp": 14,
+        "tn": 36
+      }
+    },
+    "max_normal": {
+      "threshold": 0.5358611941337585,
+      "calibration_normal_files": 481,
+      "calibration_normal_false_alarm_rate": 0.0,
+      "holdout_normal_files": 121,
+      "holdout_normal_false_alarm_rate": 0.008264462809917356,
+      "test_files": 100,
+      "test": {
+        "recall": 0.98,
+        "false_alarm_rate": 0.14,
+        "tp": 49,
+        "fn": 1,
+        "fp": 7,
+        "tn": 43
+      }
+    }
+  },
+  "chosen_cutoff": null,
+  "honest_conclusion": "No tested cutoff reaches the requested false-alarm rate under 10% on the separate test split."
+}
