@@ -17,11 +17,19 @@
 </p>
 
 <p align="center">
-  <a href="https://YOUR-SITE.vercel.app"><b>Live demo</b></a> ·
+  <a href="https://sound-guard-rust.vercel.app"><b>Live demo</b></a> ·
   <a href="#results">Results</a> ·
   <a href="#how-it-works">How it works</a> ·
   <a href="#honest-limits">Honest limits</a> ·
-  <a href="#deploy-your-own">Deploy your own</a>
+  <a href="#deploy-your-own">Deploy your own</a> ·
+  <a href="#contact">Contact</a>
+</p>
+
+<p align="center">
+  <a href="https://sound-guard-rust.vercel.app"><img alt="Live demo" src="https://img.shields.io/badge/live%20demo-open-c8ff47?style=for-the-badge&labelColor=0c1410"></a>
+  <a href="https://www.linkedin.com/in/venkata-sriharika-prathipati-b9491b300"><img alt="LinkedIn" src="https://img.shields.io/badge/LinkedIn-connect-0a66c2?style=for-the-badge&logo=linkedin&logoColor=white"></a>
+  <a href="mailto:sriharikaprathipati@gmail.com"><img alt="Email" src="https://img.shields.io/badge/email-say%20hello-d14836?style=for-the-badge&logo=gmail&logoColor=white"></a>
+  <a href="https://github.com/venkatasriharika-code"><img alt="GitHub" src="https://img.shields.io/badge/GitHub-follow-181717?style=for-the-badge&logo=github&logoColor=white"></a>
 </p>
 
 ---
@@ -95,7 +103,7 @@ Vercel functions are limited to about 250 MB, which rules out PyTorch and libros
 ## Use the API
 
 ```bash
-curl -X POST "https://YOUR-SITE.vercel.app/api/analyze-audio?machine=pump&machineId=04&filename=clip.wav" \
+curl -X POST "https://sound-guard-rust.vercel.app/api/analyze-audio?machine=pump&machineId=04&filename=clip.wav" \
      -H "Content-Type: audio/wav" --data-binary @clip.wav
 ```
 
@@ -134,7 +142,7 @@ Without these two, analysis still works. Results just are not saved.
 
 ```bash
 pip install requests scikit-learn
-python evaluate.py --url https://YOUR-SITE.vercel.app --dir <path>/pump/test --machine pump --id 04 --limit 50
+python evaluate.py --url https://sound-guard-rust.vercel.app --dir <path>/pump/test --machine pump --id 04 --limit 50
 ```
 
 You should see an AUC close to 0.97.
@@ -208,6 +216,17 @@ Models are trained on **DCASE 2020 Challenge Task 2**, which is built from two d
 
 Check each dataset's license before any commercial use (MIMII is released under CC BY-SA 4.0).
 
+## Contact
+
+Built by **Venkata Sriharika Prathipati**. If you work with textile or small-scale manufacturing and would let a microphone listen to a machine for a few hours, or you want to talk about the project, I would love to hear from you.
+
+| | |
+|---|---|
+| **Live demo** | [sound-guard-rust.vercel.app](https://sound-guard-rust.vercel.app) |
+| **LinkedIn** | [venkata-sriharika-prathipati](https://www.linkedin.com/in/venkata-sriharika-prathipati-b9491b300) |
+| **Email** | [sriharikaprathipati@gmail.com](mailto:sriharikaprathipati@gmail.com) |
+| **GitHub** | [@venkatasriharika-code](https://github.com/venkatasriharika-code) |
+
 ---
 
-<p align="center">Built by <a href="https://github.com/venkatasriharika-code">@venkatasriharika-code</a> · acoustic anomaly detection for the machines that keep small factories running.</p>
+<p align="center">acoustic anomaly detection for the machines that keep small factories running.</p>
